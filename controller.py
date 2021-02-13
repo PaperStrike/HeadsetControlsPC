@@ -1,81 +1,52 @@
-# import sys
 import timeit
+import logging
 import sounddevice as sd
-from media_controls import dispatch_event
+from event_dispatcher import dispatch_event
 
 SAMPLE_RATE = 44100  # Sample rate for our input stream
 BLOCK_SIZE = 40  # Number of samples before we trigger a processing callback
 LONG_PRESS_DURATION_THRESHOLD = 0.6  # Number of seconds button should be held to register long press
 
-AMOUNT_VALID_BLOCKS = 20
+AMOUNT_VALID_BLOCKS = 20  # Number of blocks we used to count average and largest amount
 
-# CAPTURE_THRESHOLDS = [-0.6, 0.6]
-
-# thresholds or press_values: [
-#    press_amount, # initial
-#    total_amount / amount_counted / press_amount, # average
-#    largest_amount # largest
+# diff: channel_2 - channel_1 in a sample
+# amount: sum of positive diffs in a block
+#
+# thresholds & press_values: [
+#    press_amount,
+#    total_amount / amount_counted / press_amount,
+#    largest_amount
 # ]
 BUTTON_D_THRESHOLDS = [1.24, 1.17, 1.66]
-BUTTON_B_THRESHOLDS = [0.77, 0.95, 1.57]
-BUTTON_C_THRESHOLDS = [0.72, 0.88, 0.96]
+BUTTON_B_THRESHOLDS = [0.78, 0.96, 0.81]
+BUTTON_C_THRESHOLDS = [0.72, 0.88, 0.74]
 NORMAL_THRESHOLD = 0.6
 
-RECOVER_DURATION_THRESHOLD = 0.2
-RECOVER_DIFF_THRESHOLD = 0.01
-# RECOVER_FACTOR = 0.003
+RELEASE_DURATION_THRESHOLD = 0.2  # Number of seconds diff should be within normal to register button release
+RELEASE_DIFF_THRESHOLD = 0.01  # Max diff of button releasing
 
 
 class HeadsetButtonController:
-    def process_frames(self, in_data, _frames, _time, _status):
-        # for x in in_data:
-        #     if x[0] < CAPTURE_THRESHOLDS[0] or CAPTURE_THRESHOLDS[1] < x[0]:
-        #         return
-
-        diff_list = [(x[1] - x[0]) for x in in_data]
-
-        # max_diff = max(diff_list)
-        # min_diff = min(diff_list)
-        # max_abs_diff = max(abs(max_diff), abs(min_diff))
-        # deviation = max_diff - min_diff
+    def process_frames(self, indata, _frames, _time, _status):
+        diff_list = [(x[1] - x[0]) for x in indata]
 
         amount = sum([x if x > 0 else 0 for x in diff_list])
-
-        # mean = sum(diff_list) / len(diff_list)
-        # deviation_sum = 0
-        # all_fit = True
-        # for x in diff_list:
-        #     if x < 0:
-        #         all_fit = False
-        #         break
-        # if all_fit:
-        #     deviation_sum = sum(abs(x - mean) for x in diff_list) * max_diff
-
-        # diff_sum = sum(diff_list)
-        # if diff_sum >= 0:
-        #     sys.stdout.write("\r+%f" % sum(diff_list))
-        #     sys.stdout.flush()
-        # else:
-        #     sys.stdout.write("\r%f" % sum(diff_list))
-        #     sys.stdout.flush()
-        # return
 
         if self.is_pressing:
             press_duration = timeit.default_timer() - self.press_time
 
             is_long_press = press_duration >= LONG_PRESS_DURATION_THRESHOLD
 
-            if all([abs(x) < RECOVER_DIFF_THRESHOLD for x in diff_list]):
-
+            if all([abs(x) < RELEASE_DIFF_THRESHOLD for x in diff_list]):
                 if self.recover_time == 0:
                     self.recover_time = timeit.default_timer()
-                elif RECOVER_DURATION_THRESHOLD <= timeit.default_timer() - self.recover_time:
+                elif RELEASE_DURATION_THRESHOLD <= timeit.default_timer() - self.recover_time:
                     self.is_pressing = False
                     self.recover_time = 0
                     self.press_time = 0
 
                     self.generate_press_values()
-                    print("%f %f %f %f" % (
+                    logging.info('%f %f %f %f' % (
                         self.press_values[0],
                         self.press_values[1],
                         self.press_values[2],
@@ -105,48 +76,33 @@ class HeadsetButtonController:
                         self.press_amount = 1
                     elif self.press_amount == 1:
                         self.press_amount = amount
-                    # if self.press_deviation_sum <= 0:
-                    #     self.press_deviation_sum += 1
-                    # else:
-                    #     self.press_deviation_sum = deviation_sum
                     if self.amount_counted < AMOUNT_VALID_BLOCKS:
                         self.total_amount += amount
-                        # self.total_deviation_sum += deviation_sum
                         self.amount_counted += 1
                         if self.largest_amount < amount:
                             self.largest_amount = amount
-                    # if self.largest_deviation_sum < deviation_sum:
-                    #     self.largest_deviation_sum = deviation_sum
-                    # if self.smallest_deviation_sum > deviation_sum:
-                    #     self.smallest_deviation_sum = deviation_sum
 
         else:
             if amount > NORMAL_THRESHOLD:
                 self.is_pressing = True
                 self.is_fired = False
 
-                # self.press_deviation_sum = deviation_sum
-                # self.total_deviation_sum = deviation_sum
-                # self.largest_deviation_sum = deviation_sum
-                # self.smallest_deviation_sum = deviation_sum
-
                 self.press_amount = 0
-                # self.press_deviation = deviation
                 self.amount_counted = 0
                 self.total_amount = amount
                 self.largest_amount = amount
-                self.press_values = [0]
+                self.press_values.clear()
 
                 self.press_time = timeit.default_timer()
 
     def generate_press_values(self):
-        if self.press_values[0] != 0:
+        if self.press_values:
             return
-        self.press_values = [
+        self.press_values.extend((
             self.press_amount,
             self.total_amount / self.amount_counted / self.press_amount,
             self.largest_amount
-        ]
+        ))
 
     def is_fit_press_values(self, thresholds):
         self.generate_press_values()
@@ -171,7 +127,7 @@ class HeadsetButtonController:
         self.amount_counted = 0
         self.total_amount = 0
         self.largest_amount = 0
-        self.press_values = [0]
+        self.press_values = []
 
         self.press_time = 0
         self.recover_time = 0

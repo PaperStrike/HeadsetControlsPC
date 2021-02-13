@@ -1,15 +1,16 @@
-![Banner](https://repository-images.githubusercontent.com/337772457/de0f7400-6df2-11eb-8231-fa595aaabe5c)
+![Banner](https://repository-images.githubusercontent.com/337772457/d74d2500-6e23-11eb-9b05-6ccc46c67eba)
 
 # HeadsetControlsPC
 为 PC 提供 3.5mm 耳机线控支持。
 
-目前仅支持 Windows 平台，Python 3.x。
+目前仅支持 Windows 平台，Python 3.3 或更新。
 
 ### 目录
 * [介绍](#介绍)
 * [安装](#安装)
 * [使用](#使用)
 * [注意哦](#注意哦)
+  * [抓取日志](#抓取日志)
 * [许可](#许可)
 
 ## 介绍
@@ -41,7 +42,7 @@ pip install pywin32 numpy sounddevice
 ## 使用
 插入耳机后，在安装文件夹中使用 Python 运行 `run.py` 即可:
 
-```
+```commandline
 python run.py
 ```
 
@@ -53,6 +54,13 @@ python run.py
 * 如果放久后按钮辨别老错，可能是太久不放音乐了电压不高（？存疑，欢迎讨论）  
 * 跑本软件后再插耳机会无效。
 * 灵感源于：[roligheten/AndroidMediaControlsWindows](https://github.com/roligheten/AndroidMediaControlsWindows) 👍
+
+### 抓取日志
+启动时，为启动命令添加参数 `-l` 或 `--log` 可将运行日志保存到安装文件夹的 `debug.log.1` 和 `debug.log` 日志文件中。定位 BUG 非常需要它。
+
+```commandline
+python run.py -l
+```
 
 ## 许可
 [GPL-3.0 License](https://github.com/PaperStrike/HeadsetControlsPC/blob/main/LICENSE)
