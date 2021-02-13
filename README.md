@@ -1,4 +1,6 @@
-# PC 上的有线耳机线控
+![Banner](https://repository-images.githubusercontent.com/337772457/de0f7400-6df2-11eb-8231-fa595aaabe5c)
+
+# HeadsetControlsPC
 为 PC 提供 3.5mm 耳机线控支持。
 
 目前仅支持 Windows 平台，Python 3.x。
@@ -43,15 +45,14 @@ pip install pywin32 numpy sounddevice
 python run.py
 ```
 
-拔耳机后重插需要重跑。（日后改善）
+拔耳机后重插需要重跑。（日后改善吧）
 
 ## 注意哦
 * 不要按得太快，招架不住。
-* 技术问题欢迎提 issue，其他问题请进入 [Discussions](https://github.com/PaperStrike/HeadsetControlsPC/discussions) 进行交流。
-* 跑本软件后再插耳机无效。
-* 项目精确度还不算高。
-
-灵感源于：[roligheten/AndroidMediaControlsWindows](https://github.com/roligheten/AndroidMediaControlsWindows) 👍
+* 技术问题欢迎提 issue，其他问题请进入 [讨论区（Discussions）](https://github.com/PaperStrike/HeadsetControlsPC/discussions) 进行交流。
+* 如果放久后按钮辨别老错，可能是太久不放音乐了电压不高（？存疑，欢迎讨论）  
+* 跑本软件后再插耳机会无效。
+* 灵感源于：[roligheten/AndroidMediaControlsWindows](https://github.com/roligheten/AndroidMediaControlsWindows) 👍
 
 ## 许可
-[GPL-3.0 License](https://github.com/PaperStrike/HeadsetControlsPC/blob/master/LICENSE)
+[GPL-3.0 License](https://github.com/PaperStrike/HeadsetControlsPC/blob/main/LICENSE)

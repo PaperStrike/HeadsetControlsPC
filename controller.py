@@ -5,7 +5,7 @@ from media_controls import dispatch_event
 
 SAMPLE_RATE = 44100  # Sample rate for our input stream
 BLOCK_SIZE = 40  # Number of samples before we trigger a processing callback
-LONG_PRESS_DURATION_THRESHOLD = 0.8  # Number of seconds button should be held to register long press
+LONG_PRESS_DURATION_THRESHOLD = 0.6  # Number of seconds button should be held to register long press
 
 AMOUNT_VALID_BLOCKS = 20
 
@@ -21,9 +21,9 @@ BUTTON_B_THRESHOLDS = [0.77, 0.95, 1.57]
 BUTTON_C_THRESHOLDS = [0.72, 0.88, 0.96]
 NORMAL_THRESHOLD = 0.6
 
-RECOVER_DURATION_THRESHOLD = 0.15
-# RECOVER_DEVIATION_THRESHOLD = 0.001
-RECOVER_FACTOR = 0.003
+RECOVER_DURATION_THRESHOLD = 0.2
+RECOVER_DIFF_THRESHOLD = 0.01
+# RECOVER_FACTOR = 0.003
 
 
 class HeadsetButtonController:
@@ -65,7 +65,7 @@ class HeadsetButtonController:
 
             is_long_press = press_duration >= LONG_PRESS_DURATION_THRESHOLD
 
-            if amount < self.press_amount * RECOVER_FACTOR:
+            if all([abs(x) < RECOVER_DIFF_THRESHOLD for x in diff_list]):
 
                 if self.recover_time == 0:
                     self.recover_time = timeit.default_timer()
@@ -83,7 +83,7 @@ class HeadsetButtonController:
                     ))
 
             else:
-                self.recover_time = timeit.default_timer()
+                self.recover_time = 0
 
             if not self.is_fired:
                 if not self.is_pressing or is_long_press:
