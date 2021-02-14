@@ -1,29 +1,26 @@
 import timeit
 import logging
 import sounddevice as sd
-from event_dispatcher import dispatch_event
 
-SAMPLE_RATE = 44100  # Sample rate for our input stream
-BLOCK_SIZE = 40  # Number of samples before we trigger a processing callback
-LONG_PRESS_DURATION_THRESHOLD = 0.6  # Number of seconds button should be held to register long press
+SAMPLE_RATE = 11025  # Sample rate for our input stream
+BLOCK_SIZE = 10  # Number of samples before we trigger a processing callback
 
-AMOUNT_VALID_BLOCKS = 20  # Number of blocks we used to count average and largest amount
-
-# diff: channel_2 - channel_1 in a sample
+# diff: result of channel_2 - channel_1 in a sample
 # amount: sum of positive diffs in a block
-#
+AMOUNT_VALID_BLOCKS = 5  # Number of blocks we used to count average and largest amount
+
 # thresholds & press_values: [
 #    press_amount,
-#    total_amount / amount_counted / press_amount,
+#    total_amount / amount_counted,
 #    largest_amount
 # ]
-BUTTON_D_THRESHOLDS = [1.24, 1.17, 1.66]
-BUTTON_B_THRESHOLDS = [0.78, 0.96, 0.81]
-BUTTON_C_THRESHOLDS = [0.72, 0.88, 0.74]
-NORMAL_THRESHOLD = 0.6
+BUTTON_D_THRESHOLDS = [0.323, 0.373, 0.341]
+BUTTON_B_THRESHOLDS = [0.195, 0.226, 0.199]
+BUTTON_C_THRESHOLDS = [0.177, 0.207, 0.182]
+NORMAL_THRESHOLD = 0.15
 
-RELEASE_DURATION_THRESHOLD = 0.2  # Number of seconds diff should be within normal to register button release
-RELEASE_DIFF_THRESHOLD = 0.01  # Max diff of button releasing
+RELEASE_DIFF_THRESHOLD = 0.01  # Max abs(diff) of button releasing
+RELEASE_SECONDS = 0.2  # Number of seconds diff should be within normal to register button release
 
 
 class HeadsetButtonController:
@@ -33,14 +30,14 @@ class HeadsetButtonController:
         amount = sum([x if x > 0 else 0 for x in diff_list])
 
         if self.is_pressing:
-            press_duration = timeit.default_timer() - self.press_time
+            press_seconds = timeit.default_timer() - self.press_time
 
-            is_long_press = press_duration >= LONG_PRESS_DURATION_THRESHOLD
+            is_long_press = press_seconds >= self.long_press_seconds
 
             if all([abs(x) < RELEASE_DIFF_THRESHOLD for x in diff_list]):
                 if self.recover_time == 0:
                     self.recover_time = timeit.default_timer()
-                elif RELEASE_DURATION_THRESHOLD <= timeit.default_timer() - self.recover_time:
+                elif RELEASE_SECONDS <= timeit.default_timer() - self.recover_time:
                     self.is_pressing = False
                     self.recover_time = 0
                     self.press_time = 0
@@ -50,7 +47,7 @@ class HeadsetButtonController:
                         self.press_values[0],
                         self.press_values[1],
                         self.press_values[2],
-                        press_duration
+                        press_seconds
                     ))
 
             else:
@@ -69,7 +66,7 @@ class HeadsetButtonController:
                     else:
                         press_key = 'C'
 
-                    dispatch_event(press_key=press_key, is_long_press=is_long_press)
+                    self.event_dispatcher.dispatch(press_key=press_key, is_long_press=is_long_press)
 
                 else:
                     if self.press_amount == 0:
@@ -100,7 +97,7 @@ class HeadsetButtonController:
             return
         self.press_values.extend((
             self.press_amount,
-            self.total_amount / self.amount_counted / self.press_amount,
+            self.total_amount / self.amount_counted,
             self.largest_amount
         ))
 
@@ -111,7 +108,10 @@ class HeadsetButtonController:
                 return False
         return True
 
-    def __init__(self):
+    # long_press_seconds: Number of seconds button should be held to register long press
+    def __init__(self, long_press_seconds, event_dispatcher):
+        self.long_press_seconds = long_press_seconds
+        self.event_dispatcher = event_dispatcher
         self.stream = sd.InputStream(
             samplerate=SAMPLE_RATE,
             blocksize=BLOCK_SIZE,

@@ -1,39 +1,50 @@
 import argparse
+import json
 import logging.handlers
 from threading import Event
 
 from controller import HeadsetButtonController
+from event_dispatcher import Dispatcher
 
-parser = argparse.ArgumentParser(description='Start headset controls.')
-parser.add_argument('-l', '--log', action='store_true', help='save log to file.')
+# Command line argument parsing.
+argParser = argparse.ArgumentParser(description='Start headset controls.')
+argParser.add_argument('-l', '--log', action='store_true', help='save log to file.')
 
-args = parser.parse_args()
+args = argParser.parse_args()
 
-logLevel = logging.DEBUG
-logFileName = 'debug.log'
-logFileMaxBytes = 4 * 1024
+# Load Settings.
+settingsFile = 'settings.json'
+settings = json.load(open(settingsFile, 'r'))
+
+# Log tuning.
 logToFile = args.log
+logSettings = settings['log']
+logFileSettings = logSettings['file']
 
 logHandlers = [logging.StreamHandler()]
 if logToFile:
     logFileHandler = logging.handlers.RotatingFileHandler(
-        filename=logFileName,
-        maxBytes=logFileMaxBytes,
-        backupCount=1,
-        encoding='utf-8'
+        filename=logFileSettings['name'],
+        maxBytes=logFileSettings['max-bytes'],
+        backupCount=logFileSettings['backup-count'],
+        encoding=logFileSettings['encoding']
     )
     logHandlers.append(logFileHandler)
 
 # noinspection PyArgumentList
 logging.basicConfig(
     handlers=logHandlers,
-    format='%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s] %(message)s',
-    datefmt='%m-%d %H:%M:%S',
-    level=logLevel
+    format=logSettings['format'],
+    datefmt=logSettings['date-format'],
+    level=getattr(logging, logSettings['level'].upper(), 0)
 )
 logging.info('Started.')
 
-controller = HeadsetButtonController()
+# Main
+dispatcher = Dispatcher(settings['event-keys'])
+controller = HeadsetButtonController(
+    long_press_seconds=settings['long-press-seconds'],
+    event_dispatcher=dispatcher
+)
 
-while True:
-    Event().wait()
+Event().wait()

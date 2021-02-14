@@ -33,7 +33,7 @@ Windows 平台无法获知电压差，但短接对麦克风两个声道产生的
 ## 安装
 确保 Python 中有 `pywin32`，`numpy` 和 `sounddevice` 软件包。不确定或没有的话，可通过下面的命令来检查或安装：
 
-```
+```commandline
 pip install pywin32 numpy sounddevice
 ```
 
@@ -52,11 +52,10 @@ python run.py
 * 不要按得太快，招架不住。
 * 技术问题欢迎提 issue，其他问题请进入 [讨论区（Discussions）](https://github.com/PaperStrike/HeadsetControlsPC/discussions) 进行交流。
 * 如果放久后按钮辨别老错，可能是太久不放音乐了电压不高（？存疑，欢迎讨论）  
-* 跑本软件后再插耳机会无效。
 * 灵感源于：[roligheten/AndroidMediaControlsWindows](https://github.com/roligheten/AndroidMediaControlsWindows) 👍
 
 ### 抓取日志
-启动时，为启动命令添加参数 `-l` 或 `--log` 可将运行日志保存到安装文件夹的 `debug.log.1` 和 `debug.log` 日志文件中。定位 BUG 非常需要它。
+添加参数 `-l` 或 `--log` 启动可将运行时日志保存到安装文件夹的 `debug.log.1` 和 `debug.log` 日志文件中。日志文件对定位 BUG 非常有帮助。
 
 ```commandline
 python run.py -l
