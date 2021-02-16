@@ -1,7 +1,11 @@
 .idea
 __pycache__
-alpha
+build
+dist
+*.egg-info
+tests
 docs
+.pylintrc
 *.log
 *.log.*
 *.7z
