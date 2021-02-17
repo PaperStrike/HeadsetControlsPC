@@ -1,6 +1,6 @@
 """
 Usage instructions:
-- If you are installing: `python setup.py install`
+- If you are installing: `pip install . [--user]`
 """
 import setuptools
 
@@ -8,8 +8,8 @@ with open('./README.md', 'r', encoding='utf-8') as readme:
     long_description = readme.read()
 
 setuptools.setup(
-    name='headset_controls',
-    version='0.0.1',
+    name='headset',
+    version='0.0.1a1',
     author='PaperStrike',
     author_email='1395348685z@gmail.com',
     description='为 PC 提供 3.5mm 耳机线控支持',

@@ -1,4 +1,4 @@
-![Banner](https://raw.githubusercontent.com/PaperStrike/picture-playground/master/img/HeadsetControlsPC-banner.svg)
+[![Banner](https://raw.githubusercontent.com/PaperStrike/picture-playground/master/img/HeadsetControlsPC-banner.svg)](#headset-controls)
 
 # Headset Controls
 为 PC 提供 3.5mm 耳机线控支持。
@@ -10,6 +10,7 @@ Python >= 3.6
 * [安装](#安装)
 * [使用](#使用)
   * [可选参数](#可选参数)
+  * [快捷键](#快捷键)
 * [注意哦](#注意哦)
   * [抓取日志](#抓取日志)
 * [捐赠](#捐赠)
@@ -32,20 +33,30 @@ Python >= 3.6
 
 其他情况的声道对比有兴趣的同志可以自己尝试。本项目正是在不同情况的不同声道对比中找不同，来尝试辨别不同按钮的点击、长按事件。
 
-## 安装
-确保 Python 中有 `keyboard`，`numpy` 和 `sounddevice` 软件包。不确定或没有的话，可通过下面的命令来检查或安装：
+因此，运行时需要使用麦克风。
 
+## 安装
+以下两种方式都需要联网，以安装依赖包 `keyboard`，`numpy` 和 `sounddevice` 。
+
+### PyPI
+通过 PyPI 安装：
 ```commandline
-pip install keyboard numpy sounddevice
+pip install headset
 ```
 
-从 [这里](https://github.com/PaperStrike/HeadsetControlsPC/archive/main.zip) 下载本仓库的压缩包，并将他解压到一个记得住位置的地方，作为安装文件夹。
+### Clone
+或者， 从 [这里](https://github.com/PaperStrike/HeadsetControlsPC/archive/main.zip) 下载本仓库的压缩包，将他解压到一个记得住位置的地方，作为安装文件夹。
+
+在安装文件夹中运行：
+```commandline
+pip install .
+```
 
 ## 使用
-插入耳机后，在安装文件夹中使用 `python` 启动即可:
+插入耳机后，在命令行中使用 Python 启动 `headset` 即可:
 
 ```commandline
-python -m headset_controls [参数]
+python -m headset [参数]
 ```
 
 关闭通常使用两种方式，一种是直接关闭命令行窗口，一种是按下并松开 `ctrl+shift+h` 后在 *1s* 内按下 `e` 键。
@@ -61,6 +72,15 @@ python -m headset_controls [参数]
 
 `-h` or `--help` 输出此列表后退出
 
+### 快捷键
+基础快捷键： `ctrl+shift+h`
+
+在基础快捷键触发后 *1s* 内按下以下按键可以触发相应操作：
+
+`p` 暂停或继续
+
+`e` 退出
+
 ## 注意哦
 * 不要按得太快，招架不住。
 * 技术问题欢迎提 issue，其他问题请进入 [讨论区（Discussions）](https://github.com/PaperStrike/HeadsetControlsPC/discussions) 进行交流。
@@ -68,7 +88,7 @@ python -m headset_controls [参数]
 * 灵感源于：[roligheten/AndroidMediaControlsWindows](https://github.com/roligheten/AndroidMediaControlsWindows) 👍
 
 ### 抓取日志
-添加参数 `-l` 或 `--log` 启动可将运行时日志保存到安装文件夹的 `debug.log.1` 和 `debug.log` 日志文件中。日志文件对定位 BUG 非常有帮助。
+添加参数 `-l` 或 `--log` 启动可将运行时日志保存到运行时文件夹的 `debug.log.1` 和 `debug.log` 日志文件中。日志文件对定位 BUG 非常有帮助。
 
 ```commandline
 python run.py -l
