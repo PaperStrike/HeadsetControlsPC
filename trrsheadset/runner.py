@@ -13,7 +13,7 @@ import keyboard
 import sys
 from threading import Thread
 
-from headset import controller
+from trrsheadset import controller
 
 # Main
 _message_queue = Queue()

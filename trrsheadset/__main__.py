@@ -7,7 +7,7 @@ Parse command parameters and start runner immediately.
 import argparse
 import logging.handlers
 
-from headset import runner
+from trrsheadset import runner
 
 # Command line argument parsing.
 _arg_parser = argparse.ArgumentParser(description='Start headset controls.')

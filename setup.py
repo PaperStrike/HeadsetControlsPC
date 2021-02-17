@@ -8,7 +8,7 @@ with open('./README.md', 'r', encoding='utf-8') as readme:
     long_description = readme.read()
 
 setuptools.setup(
-    name='headset',
+    name='trrsheadset',
     version='0.0.1a1',
     author='PaperStrike',
     author_email='1395348685z@gmail.com',
