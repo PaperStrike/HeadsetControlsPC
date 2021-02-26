@@ -5,17 +5,20 @@ Besides, register keyboard shortcuts.
 
 """
 
-import logging
-from typing import Callable, Optional, Any
-
 from queue import Queue
-import keyboard
+import logging
 import sys
-from threading import Thread
+from threading import Thread, Timer
+from typing import Optional, Any
+
+import keyboard
 
 from trrsheadset import controller
+from trrsheadset.controller import (
+    Listener as ControllerListener,
+)
 
-# Main
+
 _message_queue = Queue()
 
 
@@ -24,14 +27,13 @@ def _send_message(identifier, message: Optional[Any] = None):
 
 
 CONTROLLER_SETTINGS = {
+    'long-press-timeout': 0.4,
+    'double-press-timeout': 0.4,
     'event-keys': {
         'A': [
             'play/pause media',
-            'play/pause media'
-        ],
-        'D': [
             'play/pause media',
-            'play/pause media'
+            'volume mute'
         ],
         'B': [
             'volume up',
@@ -44,21 +46,69 @@ CONTROLLER_SETTINGS = {
     }
 }
 
-_controller_listener: Optional[Callable[[str, bool], None]] = None
+_last_press = {
+    'key': '',
+    'time': 0.,
+}
+_controller_listener: Optional[ControllerListener] = None
 
 
-def _controller_callback(controller_settings, press_key, is_long_press):
-    event_keys = controller_settings['event-keys']
-    target_key = event_keys[press_key][int(is_long_press)]
-    _send_message('controller', target_key)
+# noinspection PyUnusedLocal
+def _controller_callback(
+        settings,
+        press_key: str,
+        press_time: float
+) -> None:
+    event_keys: dict[str, list[str]] = settings['event-keys']
+    double_press_timeout: float = settings['double-press-timeout']
+    long_press_timeout: float = settings['long-press-timeout']
+
+    last_press_key = _last_press['key']
+    if (last_press_key
+            and len(event_keys[last_press_key]) > 2
+            and press_time - _last_press['time']
+            <= double_press_timeout):
+        _send_message(
+            'controller',
+            event_keys[last_press_key][2])
+
+    else:
+        matched_keys = event_keys[press_key]
+
+        def dispatcher():
+            nonlocal press_key
+            is_long_press: bool = not long_press_listener[1]['fired']
+
+            _send_message(
+                'controller',
+                matched_keys[int(is_long_press)])
+
+        long_press_listener = controller.add_listener(
+            event_type='release',
+            callback=lambda *args: None,
+            options={
+                'keys': [press_key],
+                'once': True
+            }
+        )
+
+        Timer(
+            interval=long_press_timeout,
+            function=dispatcher
+        ).start()
+
+    _last_press['key'] = press_key
+    _last_press['time'] = press_time
 
 
-def register_controller(controller_settings):
+def register_controller(settings):
     global _controller_listener
     if _controller_listener is not None:
         raise Exception('Controller has already been registered.')
     _controller_listener = controller.add_listener(
-        lambda *args: _controller_callback(controller_settings, *args)
+        event_type='press',
+        callback=lambda *args: _controller_callback(settings, *args),
+        options={}
     )
 
 
@@ -66,7 +116,7 @@ def unregister_controller():
     global _controller_listener
     if _controller_listener is None:
         raise Exception('Controller has not been registered yet.')
-    controller.remove_listener(_controller_listener)
+    controller.remove_listener('hold', _controller_listener)
     _controller_listener = None
 
 
@@ -85,7 +135,7 @@ HOTKEY_BINDINGS = HOTKEY_SETTINGS['bindings']
 _hotkey_listener = None
 
 
-def _hotkey_callback(hotkey_settings):
+def _hotkey_callback(settings):
     listeners = []
 
     def cleanup():
@@ -96,7 +146,7 @@ def _hotkey_callback(hotkey_settings):
         _send_message('hotkey', arg)
         cleanup()
 
-    for action_name, key_name in hotkey_settings['bindings'].items():
+    for action_name, key_name in settings['bindings'].items():
         if not key_name:
             continue
         listeners.append(keyboard.add_hotkey(
@@ -106,17 +156,17 @@ def _hotkey_callback(hotkey_settings):
             suppress=True
         ))
 
-    keyboard.call_later(cleanup, delay=hotkey_settings['timeout'])
+    Timer(interval=settings['timeout'], function=cleanup).start()
 
 
-def register_hotkey(hotkey_settings):
+def register_hotkey(settings):
     global _hotkey_listener
     if _hotkey_listener is not None:
         raise Exception('Hotkey has already been registered.')
     _hotkey_listener = keyboard.add_hotkey(
-        hotkey=hotkey_settings['appetizer'],
-        callback=lambda: _hotkey_callback(hotkey_settings),
-        suppress=bool(hotkey_settings['suppress'])
+        hotkey=settings['appetizer'],
+        callback=lambda: _hotkey_callback(settings),
+        suppress=bool(settings['suppress'])
     )
 
 
@@ -189,7 +239,7 @@ def stop_reading_messages():
 
 def start(
         controller_settings: Optional[dict] = None,
-        use_hotkey: bool = True,
+        use_hotkey: bool = False,
         hotkey_settings: Optional[dict] = None
 ):
     if controller_settings is None:

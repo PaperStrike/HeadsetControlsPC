@@ -2,21 +2,22 @@
 Usage instructions:
 - If you are installing: `pip install . [--user]`
 """
-import setuptools
+
+from setuptools import setup, find_packages
 
 with open('./README.md', 'r', encoding='utf-8') as readme:
     long_description = readme.read()
 
-setuptools.setup(
+setup(
     name='trrsheadset',
-    version='0.0.1a1',
+    version='0.0.1a2',
     author='PaperStrike',
     author_email='1395348685z@gmail.com',
     description='为 PC 提供 3.5mm 耳机线控支持',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/PaperStrike/HeadsetControlsPC',
-    packages=setuptools.find_packages(),
+    packages=find_packages(),
     install_requires=[
         'keyboard',
         'numpy',

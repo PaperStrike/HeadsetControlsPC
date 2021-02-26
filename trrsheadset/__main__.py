@@ -10,16 +10,19 @@ import logging.handlers
 from trrsheadset import runner
 
 # Command line argument parsing.
-_arg_parser = argparse.ArgumentParser(description='Start headset controls.')
+_arg_parser = argparse.ArgumentParser(
+    description='Start headset controls.',
+    prog='python -m trrsheadset'
+)
 _arg_parser.add_argument(
     '-l', '--log',
     action='store_true',
-    help='save log to file.'
+    help='save log to file'
 )
 _arg_parser.add_argument(
-    '--no-hotkey',
+    '--use-hotkey',
     action='store_true',
-    help='disable hotkeys.'
+    help='register hotkeys'
 )
 
 ARGS = _arg_parser.parse_args()
@@ -58,7 +61,7 @@ def main():
         level=getattr(logging, LOG_SETTINGS['level'].upper(), 0)
     )
 
-    runner.start(use_hotkey=not ARGS.no_hotkey)
+    runner.start(use_hotkey=ARGS.use_hotkey)
 
 
 if __name__ == '__main__':

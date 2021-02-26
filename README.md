@@ -19,7 +19,7 @@ Python >= 3.6
 * [许可](#许可)
 
 ## 介绍
-3.5mm TRRS 有线耳机的麦克风与按钮并联，按钮按下时麦克风被短接，安卓设备通过检测电压差可以知道按下的按钮。
+TRRS 接口的有线耳机的麦克风与按钮并联，按钮按下时麦克风被短接，安卓设备通过检测电压差可以知道按下的按钮。
 
 ![Reference Headset Circuits](https://camo.githubusercontent.com/6b36b17c0f21a709fb67a704f21042f656e43eecd154ac10a84807315432f97f/687474703a2f2f7777772e726f6c6967686574656e2e6e6f2f696d616765732f686561647365742d63697263756974322e706e67)
 
@@ -47,7 +47,7 @@ pip install trrsheadset
 ```
 
 ### Clone
-或者， 从 [这里](https://github.com/PaperStrike/HeadsetControlsPC/archive/main.zip) 下载本仓库的压缩包，将他解压到一个记得住位置的地方，作为安装文件夹。
+或者， 从 [这里](https://github.com/PaperStrike/HeadsetControlsPC/archive/main.zip) 下载本仓库的压缩包，解压到一个记得住位置的地方，作为安装文件夹。
 
 在安装文件夹中运行：
 ```commandline
@@ -61,21 +61,20 @@ pip install .
 python -m trrsheadset [参数]
 ```
 
-关闭通常使用两种方式，一种是直接关闭命令行窗口，一种是按下并松开 `ctrl+shift+h` 后在 *1s* 内按下 `e` 键。
-
-> 选用 `pythonw` 启动可在命令行关闭后保持运行，可通过任务管理器 `Python 3.x (Windowed)` 关闭。
+>   * 关闭可以使用两种方式，一种是直接关闭命令行，一种是按下 `ctrl+break` 快捷键强制退出。
+>   * 选用 `pythonw` 启动可在命令行关闭后保持运行，可在任务管理器种找到 `Python 3.x (Windowed)` 关闭。
 
 重插耳机需要重新启动。
 
 ### 可选参数
 `-l` or `--log` 将运行日志保存至文件
 
-`--no-hotkey` 禁用键盘快捷键
+`--use-hotkey` 开启[键盘快捷键](#键盘)
 
 `-h` or `--help` 输出此列表后退出
 
 ### 按键
-耳机按键映射和键盘快捷键响应。
+耳机按键映射 & 键盘快捷键响应。基于 Python 库 [keyboard](https://github.com/boppreh/keyboard) 。
 
 #### 耳机
  按键  | 短按            | 长按          | 双击
@@ -83,9 +82,9 @@ python -m trrsheadset [参数]
  A    | 继续 / 暂停      | 继续 / 暂停    | 静音
  B    | 音量+           | 下一首         | /
  C    | 音量-           | 上一首         | /
- D    | 继续 / 暂停      | 继续 / 暂停    | /
+ D    | /              | /             | /
 
-**双击操作处于开发早期阶段且未发布**
+**双击操作处于开发早期阶段**
 
 #### 键盘
 基础快捷键： `ctrl+shift+h`
@@ -95,6 +94,8 @@ python -m trrsheadset [参数]
 `p` 暂停或继续
 
 `e` 退出
+
+> ！ 部分设备在开启上述快捷键后，检测不到右 shift、右 ctrl 的释放动作，此时可以按击键盘左边对应按键恢复。
 
 ## 注意哦
 * 不要按得太快，招架不住。
