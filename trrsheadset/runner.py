@@ -76,7 +76,6 @@ def _controller_callback(
         matched_keys = event_keys[press_key]
 
         def dispatcher():
-            nonlocal press_key
             is_long_press: bool = not long_press_listener[1]['fired']
 
             _send_message(
