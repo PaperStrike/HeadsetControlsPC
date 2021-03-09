@@ -21,7 +21,7 @@ Python >= 3.6
 ## 介绍
 通过分析耳机上不同按钮在不同时刻对具有 TRRS 接口 PC 设备的麦克风两个声道造成的不同影响来提供耳机线控支持。
 
-更具体的实现方式可以转到这篇 [博文](https://sliphua.work/2021/03/03/headset-controls-on-pc/) 阅读。
+更具体的实现方式可以转到这篇 [博文](https://sliphua.work/headset-controls-on-pc/) 阅读。
 
 ## 安装
 以下两种方式都需要联网，会自动安装依赖包 `keyboard`，`numpy` 和 `sounddevice` 。
